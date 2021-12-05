@@ -31,8 +31,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  GameState _gamestate = GameState();
+  List<Color> _deck = [];
+  List<Color> _field = [];
+  List<Color> _hand1 = [];
+  List<Color> _hand2 = [];
+
+  void _initGame() {
+    setState(() {
+      _deck = initDeck();
+      _field = serve(_deck, 4);
+      _hand1 = serve(_deck, 4);
+      _hand2 = serve(_deck, 4);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,34 +59,38 @@ class _MyHomePageState extends State<MyHomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ColoredCard(color: Colors.blue),
-                ColoredCard(color: Colors.blue),
-                ColoredCard(color: Colors.blue),
-                ColoredCard(color: Colors.blue),
+                if (_hand2.isNotEmpty) ColoredCard(color: Colors.blue),
+                if (_hand2.length > 1) ColoredCard(color: Colors.blue),
+                if (_hand2.length > 2) ColoredCard(color: Colors.blue),
+                if (_hand2.length > 3) ColoredCard(color: Colors.blue),
               ],
             ),
             // Cards in the field
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ColoredCard(color: Colors.red),
-                ColoredCard(color: Colors.green),
-                ColoredCard(color: Colors.black),
-                ColoredCard(color: Colors.white),
+                if (_field.isNotEmpty) ColoredCard(color: _field[0]),
+                if (_field.length > 1) ColoredCard(color: _field[1]),
+                if (_field.length > 2) ColoredCard(color: _field[2]),
+                if (_field.length > 3) ColoredCard(color: _field[3]),
               ],
             ),
             // Cards in the player's hand
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ColoredCard(color: Colors.red),
-                ColoredCard(color: Colors.green),
-                ColoredCard(color: Colors.black),
-                ColoredCard(color: Colors.white),
+                if (_hand1.isNotEmpty) ColoredCard(color: _hand1[0]),
+                if (_hand1.length > 1) ColoredCard(color: _hand1[1]),
+                if (_hand1.length > 2) ColoredCard(color: _hand1[2]),
+                if (_hand1.length > 3) ColoredCard(color: _hand1[3]),
               ],
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton (
+          onPressed: () => _initGame(),
+          child: const Icon(Icons.play_arrow_rounded),
       ),
     );
   }
