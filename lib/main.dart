@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rgbw/card.dart';
 import 'package:rgbw/game.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
+
+final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
+
+final playerCardsProvider = StateProvider<List<Color>>((ref) {
+  return ref.watch(deckProvider.notifier).deal(4);
+});
+
+final fieldCardsProvider = StateProvider<List<Color>>((ref) {
+  return ref.watch(deckProvider.notifier).deal(4);
+});
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -16,82 +27,123 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'RGBW - Red Green Black and White'),
+      home: const Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class Home extends ConsumerWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<Color> _deck = [];
-  List<Color> _field = [];
-  List<Color> _hand1 = [];
-  List<Color> _hand2 = [];
-
-  void _initGame() {
-    setState(() {
-      _deck = initDeck();
-      _field = serve(_deck, 4);
-      _hand1 = serve(_deck, 4);
-      _hand2 = serve(_deck, 4);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('RGBW - Red Green Black and White'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Cards in the opponent's hand
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_hand2.isNotEmpty) ColoredCard(color: Colors.blue),
-                if (_hand2.length > 1) ColoredCard(color: Colors.blue),
-                if (_hand2.length > 2) ColoredCard(color: Colors.blue),
-                if (_hand2.length > 3) ColoredCard(color: Colors.blue),
-              ],
-            ),
-            // Cards in the field
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_field.isNotEmpty) ColoredCard(color: _field[0]),
-                if (_field.length > 1) ColoredCard(color: _field[1]),
-                if (_field.length > 2) ColoredCard(color: _field[2]),
-                if (_field.length > 3) ColoredCard(color: _field[3]),
-              ],
-            ),
-            // Cards in the player's hand
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_hand1.isNotEmpty) ColoredCard(color: _hand1[0]),
-                if (_hand1.length > 1) ColoredCard(color: _hand1[1]),
-                if (_hand1.length > 2) ColoredCard(color: _hand1[2]),
-                if (_hand1.length > 3) ColoredCard(color: _hand1[3]),
-              ],
-            ),
+          children: const [
+            OpponentCards(),
+            FieldCards(),
+            PlayerCards(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton (
-          onPressed: () => _initGame(),
-          child: const Icon(Icons.play_arrow_rounded),
+          onPressed: () {
+            final Deck deck = ref.read(deckProvider.notifier);
+            deck.init();
+            ref.read(playerCardsProvider.state).state = deck.deal(4);
+            ref.read(fieldCardsProvider.state).state = deck.deal(4);
+          },
+          child: const Icon(Icons.play_arrow_rounded)
       ),
+    );
+  }
+}
+
+class OpponentCards extends ConsumerWidget {
+  const OpponentCards({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ColoredCard(color: Colors.blue),
+        ColoredCard(color: Colors.blue),
+        ColoredCard(color: Colors.blue),
+        ColoredCard(color: Colors.blue),
+      ],
+    );
+  }
+}
+
+class FieldCards extends ConsumerWidget {
+  const FieldCards({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        FieldCard(id: 0),
+        FieldCard(id: 1),
+        FieldCard(id: 2),
+        FieldCard(id: 3),
+      ],
+    );
+  }
+}
+
+class PlayerCards extends ConsumerWidget {
+  const PlayerCards({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        PlayerCard(id: 0),
+        PlayerCard(id: 1),
+        PlayerCard(id: 2),
+        PlayerCard(id: 3),
+      ],
+    );
+  }
+}
+
+class PlayerCard extends ConsumerWidget {
+  const PlayerCard({Key? key, required this.id}) : super(key: key);
+
+  final int id;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Color color = ref.watch(playerCardsProvider)[id];
+    return Draggable(
+      child: ColoredCard(color: color),
+      feedback: ColoredCard(color: color),
+      childWhenDragging: ColoredCard(color: color.withOpacity(0.5)),
+    );
+  }
+}
+
+class FieldCard extends ConsumerWidget {
+  const FieldCard({Key? key, required this.id}) : super(key: key);
+
+  final int id;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Color color = ref.watch(fieldCardsProvider)[id];
+    return DragTarget(
+      builder: (context, accepted, rejected) {
+        return ColoredCard(color: color);
+      },
+      // onAccept: (data) => ref.read(fieldColorProvider.notifier).changeState(color),
     );
   }
 }

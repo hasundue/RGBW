@@ -1,4 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:riverpod/riverpod.dart';
+
+class Deck extends StateNotifier<List<Color>> {
+  Deck() : super(initDeck());
+
+  void init() {
+    state = initDeck();
+  }
+
+  List<Color> deal(int n) {
+    var dealed = state.sublist(0, n);
+    state = state.sublist(n);
+    return dealed;
+  }
+}
 
 List<Color> initDeck() {
   List<Color> cards = List.filled(6, Colors.red);
@@ -9,8 +24,4 @@ List<Color> initDeck() {
   return cards;
 }
 
-List<Color> serve(List<Color> cards, int n) {
-  var served = cards.sublist(0, n);
-  cards.removeRange(0, n);
-  return served;
-}
+const List<Color> initialCards = [Colors.red, Colors.green, Colors.black, Colors.white];
