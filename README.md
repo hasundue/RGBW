@@ -1,4 +1,4 @@
-# RGBW - Red, Green, Black, and White
+# RGBW - Red Green Black and White
 
-A simple card game written in Flutter.
+A simple card game made with Flutter.
 
