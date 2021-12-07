@@ -9,17 +9,11 @@ void main() {
 
 final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
 
-final playerCardsProvider = StateProvider<List<Color>>((ref) {
-  return ref.watch(deckProvider.notifier).deal(4);
-});
+final playerCardsProvider = StateProvider<List<Color>>((ref) => []);
 
-final opponCardsProvider = StateProvider<List<Color>>((ref) {
-  return ref.watch(deckProvider.notifier).deal(4);
-});
+final opponCardsProvider = StateProvider<List<Color>>((ref) => []);
 
-final fieldCardsProvider = StateProvider<List<Color>>((ref) {
-  return ref.watch(deckProvider.notifier).deal(4);
-});
+final fieldCardsProvider = StateProvider<List<Color>>((ref) => []);
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -46,12 +40,23 @@ class Home extends ConsumerWidget {
         title: const Text('RGBW - Red Green Black and White'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            OpponCards(),
-            FieldCards(),
-            PlayerCards(),
+        child: Row (
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [ 
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const [
+                DeckCards(),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const [
+                OpponCards(),
+                FieldCards(),
+                PlayerCards(),
+              ],
+            ),
           ],
         ),
       ),
@@ -125,7 +130,7 @@ class OpponCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Color color = ref.watch(opponCardsProvider)[id];
-    return ColoredCard(color: color);
+    return ColoredCard(color: color, facedown: true);
   }
 }
 
@@ -158,6 +163,22 @@ class FieldCard extends ConsumerWidget {
         return ColoredCard(color: color);
       },
       // onAccept: (data) => ref.read(fieldColorProvider.notifier).changeState(color),
+    );
+  }
+}
+
+class DeckCards extends ConsumerWidget {
+  const DeckCards({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<Color> deck = ref.watch(deckProvider);
+    var reversedDeck = List.from(deck.reversed);
+    return Stack(
+      children: [
+        for (var i = 0; i < reversedDeck.length; i++)
+          ColoredCard(color: reversedDeck[i], facedown: true),
+      ],
     );
   }
 }
