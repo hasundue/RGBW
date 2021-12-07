@@ -14,3 +14,12 @@ class ColoredCard extends SizedBox {
     height: 80,
   );
 }
+
+@immutable
+class DummyCard extends SizedBox {
+  const DummyCard({Key? key}) : super(
+    key: key,
+    width: 60,
+    height: 80,
+  );
+}

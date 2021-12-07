@@ -8,12 +8,10 @@ void main() {
 }
 
 final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
-
 final playerCardsProvider = StateProvider<List<Color>>((ref) => []);
-
 final opponCardsProvider = StateProvider<List<Color>>((ref) => []);
-
 final fieldCardsProvider = StateProvider<List<Color>>((ref) => []);
+final discardsProvider = StateProvider<List<Color>>((ref) => []);
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -145,7 +143,7 @@ class PlayerCard extends ConsumerWidget {
     return Draggable(
       child: ColoredCard(color: color),
       feedback: ColoredCard(color: color),
-      childWhenDragging: ColoredCard(color: color.withOpacity(0.5)),
+      childWhenDragging: const DummyCard(),
     );
   }
 }
@@ -172,12 +170,32 @@ class DeckCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Color> deck = ref.watch(deckProvider);
-    var reversedDeck = List.from(deck.reversed);
+    final List<Color> deck = List.from(ref.watch(deckProvider).reversed);
     return Stack(
       children: [
-        for (var i = 0; i < reversedDeck.length; i++)
-          ColoredCard(color: reversedDeck[i], facedown: true),
+        for (var i = 0; i < deck.length - 1; i++)
+          ColoredCard(color: deck[i], facedown: true),
+        Draggable(
+          child: ColoredCard(color: deck.last, facedown: true),
+          feedback: ColoredCard(color: deck.last, facedown: true),
+          childWhenDragging: const DummyCard(),
+        ),
+      ],
+    );
+  }
+}
+
+class Discards extends ConsumerWidget {
+  const Discards({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<Color> cards = ref.watch(discardsProvider);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < cards.length; i++)
+          FieldCard(id: i),
       ],
     );
   }
