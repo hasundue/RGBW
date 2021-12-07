@@ -16,12 +16,11 @@ class Deck extends StateNotifier<List<Color>> {
 }
 
 List<Color> initDeck() {
-  List<Color> cards = List.filled(6, Colors.red);
-  cards += List.filled(6, Colors.green);
-  cards += List.filled(6, Colors.black);
-  cards += List.filled(2, Colors.white);
-  cards.shuffle();
-  return cards;
+  List<Color> deck = List.filled(6, Colors.red);
+  deck += List.filled(6, Colors.green);
+  deck += List.filled(6, Colors.black);
+  deck += List.filled(2, Colors.white);
+  deck.shuffle();
+  return deck;
 }
 
-const List<Color> initialCards = [Colors.red, Colors.green, Colors.black, Colors.white];

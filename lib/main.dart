@@ -13,6 +13,10 @@ final playerCardsProvider = StateProvider<List<Color>>((ref) {
   return ref.watch(deckProvider.notifier).deal(4);
 });
 
+final opponCardsProvider = StateProvider<List<Color>>((ref) {
+  return ref.watch(deckProvider.notifier).deal(4);
+});
+
 final fieldCardsProvider = StateProvider<List<Color>>((ref) {
   return ref.watch(deckProvider.notifier).deal(4);
 });
@@ -45,7 +49,7 @@ class Home extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: const [
-            OpponentCards(),
+            OpponCards(),
             FieldCards(),
             PlayerCards(),
           ],
@@ -56,6 +60,7 @@ class Home extends ConsumerWidget {
             final Deck deck = ref.read(deckProvider.notifier);
             deck.init();
             ref.read(playerCardsProvider.state).state = deck.deal(4);
+            ref.read(opponCardsProvider.state).state = deck.deal(4);
             ref.read(fieldCardsProvider.state).state = deck.deal(4);
           },
           child: const Icon(Icons.play_arrow_rounded)
@@ -64,18 +69,17 @@ class Home extends ConsumerWidget {
   }
 }
 
-class OpponentCards extends ConsumerWidget {
-  const OpponentCards({Key? key}) : super(key: key);
+class OpponCards extends ConsumerWidget {
+  const OpponCards({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final List<Color> cards = ref.watch(opponCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ColoredCard(color: Colors.blue),
-        ColoredCard(color: Colors.blue),
-        ColoredCard(color: Colors.blue),
-        ColoredCard(color: Colors.blue),
+        for (var i = 0; i < cards.length; i++)
+          OpponCard(id: i),
       ],
     );
   }
@@ -86,13 +90,12 @@ class FieldCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final List<Color> cards = ref.watch(fieldCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        FieldCard(id: 0),
-        FieldCard(id: 1),
-        FieldCard(id: 2),
-        FieldCard(id: 3),
+      children: [
+        for (var i = 0; i < cards.length; i++)
+          FieldCard(id: i),
       ],
     );
   }
@@ -103,15 +106,26 @@ class PlayerCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final List<Color> cards = ref.watch(playerCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        PlayerCard(id: 0),
-        PlayerCard(id: 1),
-        PlayerCard(id: 2),
-        PlayerCard(id: 3),
+      children: [
+        for (var i = 0; i < cards.length; i++)
+          PlayerCard(id: i),
       ],
     );
+  }
+}
+
+class OpponCard extends ConsumerWidget {
+  const OpponCard({Key? key, required this.id}) : super(key: key);
+
+  final int id;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Color color = ref.watch(opponCardsProvider)[id];
+    return ColoredCard(color: color);
   }
 }
 
