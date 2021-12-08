@@ -59,16 +59,18 @@ class Home extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton (
-          onPressed: () {
-            final Deck deck = ref.read(deckProvider.notifier);
-            deck.init();
-            ref.read(playerCardsProvider.state).state = deck.deal(4);
-            ref.read(opponCardsProvider.state).state = deck.deal(4);
-            ref.read(fieldCardsProvider.state).state = deck.deal(4);
-          },
+          onPressed: () => initGame(ref),
           child: const Icon(Icons.play_arrow_rounded)
       ),
     );
+  }
+
+  void initGame(WidgetRef ref) {
+    final Deck deck = ref.read(deckProvider.notifier);
+    deck.init();
+    ref.read(playerCardsProvider.state).state = deck.deal(4);
+    ref.read(opponCardsProvider.state).state = deck.deal(4);
+    ref.read(fieldCardsProvider.state).state = deck.deal(4);
   }
 }
 
