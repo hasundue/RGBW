@@ -23,9 +23,7 @@ jobs:
           channel: 'master'
 
       - name: Build
-        run: flutter build web
-        env: 
-          FLUTTER_BASE_HREF: /RGBW/
+        run: flutter build web --base-href '/RGBW/'
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
