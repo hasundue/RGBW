@@ -24,6 +24,7 @@ jobs:
 
       - name: Build
         run: flutter build web
+        env: FLUTTER_BASE_HREF: /RGBW/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
