@@ -14,14 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Flutter
-        run: |
-          git clone https://github.com/flutter/flutter.git --depth 1 -b master flutter
-          echo "${GITHUB_WORKSPACE}/flutter/bin" >> ${GITHUB_PATH}
+      - uses: actions/setup-java@v1
 
-      - name: Install
-        run: |
-          flutter pub get
+      - uses: subosito/flutter-action@v1
 
       - name: Build
         run: flutter build web
