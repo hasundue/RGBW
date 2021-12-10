@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rgbw/card.dart';
-import 'package:rgbw/game.dart';
+import 'package:RGBW/card.dart';
+import 'package:RGBW/game.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
