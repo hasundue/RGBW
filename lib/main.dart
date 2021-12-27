@@ -39,7 +39,7 @@ class Home extends ConsumerWidget {
       ),
       body: Center(
         child: Row (
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [ 
             Column(
               children: const [
@@ -56,10 +56,15 @@ class Home extends ConsumerWidget {
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                DummyCard(),
-                DummyCard(),
-                DeckCards(),
+              children: [
+                const DummyCard(),
+                const DummyCard(),
+                Row(
+                  children: const [
+                    DummyCard(),
+                    DeckCards(),
+                  ]
+                ),
               ],
             ),
           ],
