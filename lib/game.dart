@@ -24,3 +24,24 @@ List<Color> initDeck() {
   return deck;
 }
 
+class PlayerCards extends StateNotifier<List<Color>> {
+  PlayerCards() : super([]);
+
+  void replace(int id, Color color) {
+    state[id] = color;
+  }
+}
+
+extension Replace on List<Color> {
+  List<Color> replace(int i, Color x) {
+    List<Color> list = [];
+    for (var j = 0; j < length; j++) {
+      if (j == i) {
+        list.add(x);
+      } else {
+        list.add(this[j]);
+      }
+    }
+    return list;
+  }
+}

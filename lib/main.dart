@@ -176,7 +176,7 @@ class FieldCard extends ConsumerWidget {
         return ColoredCard(color: color);
       },
       onAccept: (Map data) {
-        ref.read(playerCardsProvider)[data['id']] = color;
+        ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
         color = data['color'];
       },
     );
