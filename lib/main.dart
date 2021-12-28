@@ -155,6 +155,7 @@ class PlayerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Color color = ref.watch(playerCardsProvider)[id];
     return Draggable(
+      data: {'id': id, 'color': color},
       child: ColoredCard(color: color),
       feedback: ColoredCard(color: color),
       childWhenDragging: const DummyCard(),
@@ -169,12 +170,15 @@ class FieldCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Color color = ref.watch(fieldCardsProvider)[id];
+    Color color = ref.watch(fieldCardsProvider)[id];
     return DragTarget(
       builder: (context, accepted, rejected) {
         return ColoredCard(color: color);
       },
-      // onAccept: (data) => ref.read(fieldColorProvider.notifier).changeState(color),
+      onAccept: (Map data) {
+        ref.read(playerCardsProvider)[data['id']] = color;
+        color = data['color'];
+      },
     );
   }
 }
