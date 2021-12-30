@@ -42,28 +42,12 @@ class Home extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [ 
             Column(
-              children: const [
-                DummyCard(),
-              ],
-            ),
-            Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
                 OpponCards(),
                 FieldCards(),
                 PlayerCards(),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const DummyCard(),
-                const DummyCard(),
-                Row(
-                  children: const [
-                    DeckCards(),
-                  ]
-                ),
+                DeckCards(),
               ],
             ),
           ],
@@ -140,8 +124,9 @@ class OpponCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Size deviceSize = MediaQuery.of(context).size;
     final Color color = ref.watch(opponCardsProvider)[id];
-    return ColoredCard(color: color, facedown: true);
+    return ColoredCard(color: color, facedown: true, size: deviceSize);
   }
 }
 
@@ -152,12 +137,13 @@ class PlayerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Size deviceSize = MediaQuery.of(context).size;
     final Color color = ref.watch(playerCardsProvider)[id];
     return Draggable(
       data: {'id': id, 'color': color},
-      child: ColoredCard(color: color),
-      feedback: ColoredCard(color: color),
-      childWhenDragging: const DummyCard(),
+      child: ColoredCard(color: color, size: deviceSize),
+      feedback: ColoredCard(color: color, size: deviceSize),
+      childWhenDragging: DummyCard(size: deviceSize),
     );
   }
 }
@@ -169,10 +155,11 @@ class FieldCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Size deviceSize = MediaQuery.of(context).size;
     Color color = ref.watch(fieldCardsProvider)[id];
     return DragTarget(
       builder: (context, accepted, rejected) {
-        return ColoredCard(color: color);
+        return ColoredCard(color: color, size: deviceSize);
       },
       onAccept: (Map data) {
         if (data['color'] != color) {
@@ -190,15 +177,16 @@ class DeckCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final Size deviceSize = MediaQuery.of(context).size;
     final List<Color> deck = List.from(ref.watch(deckProvider).reversed);
     return Stack(
       children: [
         for (var i = 0; i < deck.length - 1; i++)
-          ColoredCard(color: deck[i], facedown: true),
+          ColoredCard(color: deck[i], size: deviceSize, facedown: true),
         Draggable(
-          child: ColoredCard(color: deck.last, facedown: true),
-          feedback: ColoredCard(color: deck.last, facedown: true),
-          childWhenDragging: const DummyCard(),
+          child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+          feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+          childWhenDragging: DummyCard(size: deviceSize),
         ),
       ],
     );
