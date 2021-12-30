@@ -42,15 +42,12 @@ class Home extends ConsumerWidget {
         child: Row (
           mainAxisAlignment: MainAxisAlignment.center,
           children: [ 
-            const Padding(
-              padding: EdgeInsets.all(50.0),
-              child: Discards(),
-            ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
                 AliceCards(),
                 FieldCards(),
+                Discards(),
                 PlayerCards(),
                 DeckCards(),
               ],
@@ -260,26 +257,31 @@ class Discards extends ConsumerWidget {
     final List<Color> green = cards.where((card) => card == Colors.green).toList();
     final List<Color> black = cards.where((card) => card == Colors.black).toList();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var color in [red, green, black])
-          if (color.isNotEmpty)
-            Row(
-              children: [ 
-                Stack(
-                  children: [
-                    for (var i = 0; i < color.length; i++)
-                      ColoredCard(color: color[0], size: deviceSize, rotated: true),
+    return DragTarget(
+      builder: (context, accepted, rejected) {
+        return Row(
+          children: [
+            for (var color in [red, green, black])
+              if (color.isNotEmpty)
+                Row(
+                  children: [ 
+                    Stack(
+                      children: [
+                        for (var i = 0; i < color.length; i++)
+                          ColoredCard(color: color[0], size: deviceSize),
+                      ],
+                    ),
+                    Text(
+                      color.length.toString(),
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ],
                 ),
-                Text(
-                  color.length.toString(),
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ],
-            ),
-      ],
-    );
-  }
-}
+            if ([red, green, black].every((color) => color.isEmpty))
+              DummyCard(size: deviceSize),
+          ],
+        );
+      },
+    ); // DragTarget
+  } // Widget
+} // class
