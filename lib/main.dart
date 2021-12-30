@@ -61,7 +61,6 @@ class Home extends ConsumerWidget {
                 const DummyCard(),
                 Row(
                   children: const [
-                    DummyCard(),
                     DeckCards(),
                   ]
                 ),
