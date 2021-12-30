@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-const widthRatio = 0.1;
 const heightRatio = 0.12;
+const widthRatio = heightRatio * 0.8;
 
 class ColoredCard extends SizedBox {
   ColoredCard({Key? key,
@@ -14,8 +14,8 @@ class ColoredCard extends SizedBox {
       color: facedown ? Colors.blue : color,
       elevation: 2,
     ),
-    width: size.width * widthRatio,
-    height: size.width * heightRatio,
+    width: size.height * widthRatio,
+    height: size.height * heightRatio,
   );
 }
 
@@ -23,7 +23,7 @@ class ColoredCard extends SizedBox {
 class DummyCard extends SizedBox {
   DummyCard({Key? key, Size size = const Size(1280, 800)}) : super(
     key: key,
-    width: size.width * widthRatio,
-    height: size.width * heightRatio,
+    width: size.height * widthRatio,
+    height: size.height * heightRatio,
   );
 }
