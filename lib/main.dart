@@ -41,6 +41,7 @@ class Home extends ConsumerWidget {
         child: Row (
           mainAxisAlignment: MainAxisAlignment.center,
           children: [ 
+            const Discards(),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
@@ -106,15 +107,15 @@ class PlayerCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Color> cards = ref.watch(playerCardsProvider);
+    List<Color> cards = ref.watch(playerCardsProvider);
     return DragTarget(
       builder: (context, accepted, rejected) {
         return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < cards.length; i++)
-              PlayerCard(id: i),
-            ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < cards.length; i++)
+            PlayerCard(id: i),
+          ],
         );
       },
       onAccept: (Color data) {
@@ -152,6 +153,12 @@ class PlayerCard extends ConsumerWidget {
       child: ColoredCard(color: color, size: deviceSize),
       feedback: ColoredCard(color: color, size: deviceSize),
       childWhenDragging: DummyCard(size: deviceSize),
+      onDraggableCanceled: (Velocity velocity, Offset offset) {
+        print(velocity);
+        if (velocity != Velocity.zero) {
+          ref.read(playerCardsProvider.notifier).state.removeAt(id);
+        }
+      },
     );
   }
 }
@@ -207,12 +214,14 @@ class Discards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Color> cards = ref.watch(discardsProvider);
+    final Size deviceSize = MediaQuery.of(context).size;
+    List<Color> cards = ref.watch(discardsProvider);
+    cards.sort();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < cards.length; i++)
-          FieldCard(id: i),
+          ColoredCard(color: cards[i], size: deviceSize),
       ],
     );
   }
