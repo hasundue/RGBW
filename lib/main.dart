@@ -175,8 +175,11 @@ class FieldCard extends ConsumerWidget {
         return ColoredCard(color: color);
       },
       onAccept: (Map data) {
-        ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
-        color = data['color'];
+        if (data['color'] != color) {
+          ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
+          color = data['color'];
+          // Move to opponent't turn
+        }
       },
     );
   }
