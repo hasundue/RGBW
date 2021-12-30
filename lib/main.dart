@@ -9,7 +9,7 @@ void main() {
 
 final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
 final playerCardsProvider = StateProvider<List<Color>>((ref) => []);
-final opponCardsProvider = StateProvider<List<Color>>((ref) => []);
+final aliceCardsProvider = StateProvider<List<Color>>((ref) => []);
 final fieldCardsProvider = StateProvider<List<Color>>((ref) => []);
 final discardsProvider = StateProvider<List<Color>>((ref) => []);
 
@@ -48,7 +48,7 @@ class Home extends ConsumerWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
-                OpponCards(),
+                AliceCards(),
                 FieldCards(),
                 PlayerCards(),
                 DeckCards(),
@@ -68,23 +68,23 @@ class Home extends ConsumerWidget {
     final Deck deck = ref.read(deckProvider.notifier);
     deck.init();
     ref.read(playerCardsProvider.state).state = deck.deal(4);
-    ref.read(opponCardsProvider.state).state = deck.deal(4);
+    ref.read(aliceCardsProvider.state).state = deck.deal(4);
     ref.read(fieldCardsProvider.state).state = deck.deal(4);
     ref.read(discardsProvider.state).state = [];
   }
 }
 
-class OpponCards extends ConsumerWidget {
-  const OpponCards({Key? key}) : super(key: key);
+class AliceCards extends ConsumerWidget {
+  const AliceCards({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Color> cards = ref.watch(opponCardsProvider);
+    final List<Color> cards = ref.watch(aliceCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < cards.length; i++)
-          OpponCard(id: i),
+          AliceCard(id: i),
       ],
     );
   }
@@ -130,15 +130,15 @@ class PlayerCards extends ConsumerWidget {
   }
 }
 
-class OpponCard extends ConsumerWidget {
-  const OpponCard({Key? key, required this.id}) : super(key: key);
+class AliceCard extends ConsumerWidget {
+  const AliceCard({Key? key, required this.id}) : super(key: key);
 
   final int id;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    final Color color = ref.watch(opponCardsProvider)[id];
+    final Color color = ref.watch(aliceCardsProvider)[id];
     return ColoredCard(color: color, facedown: true, size: deviceSize);
   }
 }
@@ -184,7 +184,7 @@ class FieldCard extends ConsumerWidget {
         if (data['color'] != color) {
           ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
           color = data['color'];
-          // Move to opponent't turn
+          // Move to aliceent't turn
         }
       },
     );
