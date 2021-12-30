@@ -7,15 +7,16 @@ class ColoredCard extends SizedBox {
   ColoredCard({Key? key,
                Color color = Colors.blue,
                Size size = const Size(1280, 800),
-               bool facedown = false})
+               bool facedown = false,
+               bool rotated = false})
   : super(
     key: key,
     child: Card(
       color: facedown ? Colors.blue : color,
       elevation: 2,
     ),
-    width: size.height * widthRatio,
-    height: size.height * heightRatio,
+    width: size.height * (rotated ? heightRatio : widthRatio),
+    height: size.height * (rotated ? widthRatio : heightRatio),
   );
 }
 

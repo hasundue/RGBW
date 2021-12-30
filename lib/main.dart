@@ -41,7 +41,10 @@ class Home extends ConsumerWidget {
         child: Row (
           mainAxisAlignment: MainAxisAlignment.center,
           children: [ 
-            const Discards(),
+            const Padding(
+              padding: EdgeInsets.all(50.0),
+              child: Discards(),
+            ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: const [
@@ -195,18 +198,32 @@ class DeckCards extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
     final List<Color> deck = List.from(ref.watch(deckProvider).reversed);
-    return Stack(
-      children: [
-        for (var i = 0; i < deck.length - 1; i++)
-          ColoredCard(color: deck[i], size: deviceSize, facedown: true),
-        Draggable(
-          data: deck.last,
-          child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
-          feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
-          childWhenDragging: DummyCard(size: deviceSize),
-        ),
-      ],
-    );
+    final int nCards = deck.length;
+
+    if (deck.isNotEmpty) {
+      return Row(
+        children: [
+          Stack(
+            children: [
+              for (var i = 0; i < deck.length - 1; i++)
+              ColoredCard(color: deck[i], size: deviceSize, facedown: true),
+              Draggable(
+                data: deck.last,
+                child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                childWhenDragging: DummyCard(size: deviceSize),
+              ),
+            ],
+          ),
+          Text(
+            deck.length.toString(),
+            style: const TextStyle(fontSize: 20),
+          ),
+        ],
+      );
+    } else {
+      return DummyCard(size: deviceSize);
+    }
   }
 }
 
@@ -216,12 +233,32 @@ class Discards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    List<Color> cards = ref.watch(discardsProvider);
-    return Row(
+
+    final List<Color> cards = ref.watch(discardsProvider);
+
+    final List<Color> red = cards.where((card) => card == Colors.red).toList();
+    final List<Color> green = cards.where((card) => card == Colors.green).toList();
+    final List<Color> black = cards.where((card) => card == Colors.black).toList();
+
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        for (var i = 0; i < cards.length; i++)
-          ColoredCard(color: cards[i], size: deviceSize),
+        for (var color in [red, green, black])
+          if (color.isNotEmpty)
+            Row(
+              children: [ 
+                Stack(
+                  children: [
+                    for (var i = 0; i < color.length; i++)
+                      ColoredCard(color: color[0], size: deviceSize, rotated: true),
+                  ],
+                ),
+                Text(
+                  color.length.toString(),
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ],
+            ),
       ],
     );
   }
