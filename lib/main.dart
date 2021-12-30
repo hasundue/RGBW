@@ -107,12 +107,20 @@ class PlayerCards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final List<Color> cards = ref.watch(playerCardsProvider);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var i = 0; i < cards.length; i++)
-          PlayerCard(id: i),
-      ],
+    return DragTarget(
+      builder: (context, accepted, rejected) {
+        return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < cards.length; i++)
+              PlayerCard(id: i),
+            ],
+        );
+      },
+      onAccept: (Color data) {
+        ref.read(playerCardsProvider.notifier).state.add(data);
+        ref.read(deckProvider.notifier).deal(1);
+      },
     );
   }
 }
@@ -184,6 +192,7 @@ class DeckCards extends ConsumerWidget {
         for (var i = 0; i < deck.length - 1; i++)
           ColoredCard(color: deck[i], size: deviceSize, facedown: true),
         Draggable(
+          data: deck.last,
           child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
           feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
           childWhenDragging: DummyCard(size: deviceSize),
