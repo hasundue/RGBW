@@ -7,6 +7,7 @@ void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+final gamePhaseProvider = StateProvider<GamePhase>((ref) => GamePhase.setup);
 final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
 final playerCardsProvider = StateProvider<List<Color>>((ref) => []);
 final aliceCardsProvider = StateProvider<List<Color>>((ref) => []);
@@ -58,8 +59,8 @@ class Home extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton (
-          onPressed: () => initGame(ref),
-          child: const Icon(Icons.play_arrow_rounded)
+        onPressed: () => initGame(ref),
+        child: const Icon(Icons.play_arrow_rounded)
       ),
     );
   }
@@ -67,10 +68,11 @@ class Home extends ConsumerWidget {
   void initGame(WidgetRef ref) {
     final Deck deck = ref.read(deckProvider.notifier);
     deck.init();
-    ref.read(playerCardsProvider.state).state = deck.deal(4);
-    ref.read(aliceCardsProvider.state).state = deck.deal(4);
-    ref.read(fieldCardsProvider.state).state = deck.deal(4);
-    ref.read(discardsProvider.state).state = [];
+    ref.read(playerCardsProvider.notifier).state = deck.deal(4);
+    ref.read(aliceCardsProvider.notifier).state = deck.deal(4);
+    ref.read(fieldCardsProvider.notifier).state = deck.deal(4);
+    ref.read(discardsProvider.notifier).state = [];
+    ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
   }
 }
 
@@ -151,17 +153,23 @@ class PlayerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
+    final GamePhase phase = ref.read(gamePhaseProvider);
     final Color color = ref.watch(playerCardsProvider)[id];
+
     return Draggable(
       data: {'id': id, 'color': color},
       child: ColoredCard(color: color, size: deviceSize),
       feedback: ColoredCard(color: color, size: deviceSize),
       childWhenDragging: DummyCard(size: deviceSize),
       onDraggableCanceled: (Velocity velocity, Offset offset) {
-        if (velocity != Velocity.zero && color != Colors.white) {
+        if (phase == GamePhase.discard && velocity != Velocity.zero && color != Colors.white) {
           ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(id));
           ref.read(discardsProvider.notifier).update((state) => state.addCard(color));
+          ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
         }
+      },
+      onDragCompleted: () {
+        ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
       },
     );
   }
@@ -175,19 +183,25 @@ class FieldCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    Color color = ref.watch(fieldCardsProvider)[id];
-    return DragTarget(
-      builder: (context, accepted, rejected) {
-        return ColoredCard(color: color, size: deviceSize);
-      },
-      onAccept: (Map data) {
-        if (data['color'] != color) {
-          ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
-          color = data['color'];
-          // Move to aliceent't turn
-        }
-      },
-    );
+    final GamePhase phase = ref.watch(gamePhaseProvider);
+    final Color color = ref.watch(fieldCardsProvider)[id];
+
+    if (phase == GamePhase.replace) {
+      return DragTarget(
+        builder: (context, accepted, rejected) {
+          return ColoredCard(color: color, size: deviceSize);
+        },
+        onAccept: (Map data) {
+          if (data['color'] != color) {
+            ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
+            ref.read(fieldCardsProvider.notifier).update((state) => state.replace(id, data['color']));
+            ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+          }
+        },
+      );
+    } else {
+      return ColoredCard(color: color, size: deviceSize);
+    }
   }
 }
 
@@ -197,8 +211,8 @@ class DeckCards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
+    final GamePhase phase = ref.watch(gamePhaseProvider);
     final List<Color> deck = List.from(ref.watch(deckProvider).reversed);
-    final int nCards = deck.length;
 
     if (deck.isNotEmpty) {
       return Row(
@@ -206,13 +220,19 @@ class DeckCards extends ConsumerWidget {
           Stack(
             children: [
               for (var i = 0; i < deck.length - 1; i++)
-              ColoredCard(color: deck[i], size: deviceSize, facedown: true),
-              Draggable(
-                data: deck.last,
-                child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
-                feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
-                childWhenDragging: DummyCard(size: deviceSize),
-              ),
+                ColoredCard(color: deck[i], size: deviceSize, facedown: true),
+              if (phase == GamePhase.draw)
+                Draggable(
+                  data: deck.last,
+                  child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                  feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                  childWhenDragging: DummyCard(size: deviceSize),
+                  onDragCompleted: () {
+                    ref.read(gamePhaseProvider.notifier).state = GamePhase.discard;
+                  },
+                ),
+              if (phase != GamePhase.draw)
+                ColoredCard(color: deck.last, size: deviceSize, facedown: true),
             ],
           ),
           Text(

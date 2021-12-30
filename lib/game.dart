@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod/riverpod.dart';
 
+enum GamePhase {
+  setup,
+  draw,
+  discard,
+  replace,
+  alice,
+}
+
 class Deck extends StateNotifier<List<Color>> {
-  Deck() : super(initDeck());
+  Deck() : super([]);
 
   void init() {
     state = initDeck();
