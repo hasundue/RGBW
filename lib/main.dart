@@ -67,6 +67,7 @@ class Home extends ConsumerWidget {
     ref.read(playerCardsProvider.state).state = deck.deal(4);
     ref.read(opponCardsProvider.state).state = deck.deal(4);
     ref.read(fieldCardsProvider.state).state = deck.deal(4);
+    ref.read(discardsProvider.state).state = [];
   }
 }
 
@@ -119,7 +120,7 @@ class PlayerCards extends ConsumerWidget {
         );
       },
       onAccept: (Color data) {
-        ref.read(playerCardsProvider.notifier).state.add(data);
+        ref.read(playerCardsProvider).add(data);
         ref.read(deckProvider.notifier).deal(1);
       },
     );
@@ -154,9 +155,9 @@ class PlayerCard extends ConsumerWidget {
       feedback: ColoredCard(color: color, size: deviceSize),
       childWhenDragging: DummyCard(size: deviceSize),
       onDraggableCanceled: (Velocity velocity, Offset offset) {
-        print(velocity);
-        if (velocity != Velocity.zero) {
-          ref.read(playerCardsProvider.notifier).state.removeAt(id);
+        if (velocity != Velocity.zero && color != Colors.white) {
+          ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(id));
+          ref.read(discardsProvider.notifier).update((state) => state.addCard(color));
         }
       },
     );
@@ -216,7 +217,6 @@ class Discards extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
     List<Color> cards = ref.watch(discardsProvider);
-    cards.sort();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

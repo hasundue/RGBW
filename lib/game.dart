@@ -32,7 +32,7 @@ class PlayerCards extends StateNotifier<List<Color>> {
   }
 }
 
-extension Replace on List<Color> {
+extension Game on List<Color> {
   List<Color> replace(int i, Color x) {
     List<Color> list = [];
     for (var j = 0; j < length; j++) {
@@ -44,4 +44,23 @@ extension Replace on List<Color> {
     }
     return list;
   }
+
+  List<Color> addCard(Color x) {
+    List<Color> list = [];
+    for (var j = 0; j < length; j++) {
+      list.add(this[j]);
+    }
+    list.add(x);
+    return list;
+  }
+  
+  List<Color> removeCard(int i) {
+    List<Color> list = [];
+    for (var j = 0; j < length; j++) {
+      if (j != i) {
+        list.add(this[j]);
+      }
+    }
+    return list;
+  } 
 }
