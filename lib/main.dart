@@ -44,12 +44,16 @@ class Home extends ConsumerWidget {
           children: [ 
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                AliceCards(),
-                FieldCards(),
-                Discards(),
-                PlayerCards(),
-                DeckCards(),
+              children: [
+                const AliceCards(),
+                const FieldCards(),
+                const PlayerCards(),
+                Row (
+                  children: const [
+                    Discards(),
+                    DeckCards(),
+                  ],
+                ),
               ],
             ),
           ],
@@ -124,6 +128,7 @@ class PlayerCards extends ConsumerWidget {
       onAccept: (Color data) {
         ref.read(playerCardsProvider).add(data);
         ref.read(deckProvider.notifier).deal(1);
+        ref.read(gamePhaseProvider.notifier).state = GamePhase.discard;
       },
     );
   }
@@ -158,16 +163,6 @@ class PlayerCard extends ConsumerWidget {
       child: ColoredCard(color: color, size: deviceSize),
       feedback: ColoredCard(color: color, size: deviceSize),
       childWhenDragging: DummyCard(size: deviceSize),
-      onDraggableCanceled: (Velocity velocity, Offset offset) {
-        if (phase == GamePhase.discard && velocity != Velocity.zero && color != Colors.white) {
-          ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(id));
-          ref.read(discardsProvider.notifier).update((state) => state.addCard(color));
-          ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
-        }
-      },
-      onDragCompleted: () {
-        ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
-      },
     );
   }
 }
@@ -224,9 +219,6 @@ class DeckCards extends ConsumerWidget {
                   child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
                   feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
                   childWhenDragging: DummyCard(size: deviceSize),
-                  onDragCompleted: () {
-                    ref.read(gamePhaseProvider.notifier).state = GamePhase.discard;
-                  },
                 ),
               if (phase != GamePhase.draw)
                 ColoredCard(color: deck.last, size: deviceSize, facedown: true),
@@ -250,6 +242,7 @@ class Discards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
+    final GamePhase phase = ref.watch(gamePhaseProvider);
 
     final List<Color> cards = ref.watch(discardsProvider);
 
@@ -262,26 +255,32 @@ class Discards extends ConsumerWidget {
         return Row(
           children: [
             for (var color in [red, green, black])
-              if (color.isNotEmpty)
-                Row(
-                  children: [ 
-                    Stack(
-                      children: [
-                        for (var i = 0; i < color.length; i++)
-                          ColoredCard(color: color[0], size: deviceSize),
-                      ],
-                    ),
+              Row(
+                children: [ 
+                  Stack(
+                    children: [
+                      DummyCard(size: deviceSize),
+                      for (var i = 0; i < color.length; i++)
+                        ColoredCard(color: color[0], size: deviceSize),
+                    ],
+                  ),
+                  if (color.isNotEmpty)
                     Text(
                       color.length.toString(),
                       style: const TextStyle(fontSize: 20),
                     ),
-                  ],
-                ),
-            if ([red, green, black].every((color) => color.isEmpty))
-              DummyCard(size: deviceSize),
+                ],
+              ), // Row
           ],
-        );
+        ); // Row
+      }, // builder
+      onAccept: (Map data) {
+        if (phase == GamePhase.discard) {
+          ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(data['id']));
+          ref.read(discardsProvider.notifier).update((state) => state.addCard(data['color']));
+          ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
+        }
       },
     ); // DragTarget
   } // Widget
-} // class
+}
