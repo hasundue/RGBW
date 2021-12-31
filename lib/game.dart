@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
-
 enum GamePhase {
   setup,
   draw,
@@ -9,66 +6,44 @@ enum GamePhase {
   alice,
 }
 
-class Deck extends StateNotifier<List<Color>> {
-  Deck() : super([]);
-
-  void init() {
-    state = initDeck();
-  }
-
-  List<Color> deal(int n) {
-    var dealed = state.sublist(0, n);
-    state = state.sublist(n);
-    return dealed;
-  }
+enum GameCard {
+  red,
+  green,
+  black,
+  white,
 }
 
-List<Color> initDeck() {
-  List<Color> deck = List.filled(6, Colors.red);
-  deck += List.filled(6, Colors.green);
-  deck += List.filled(6, Colors.black);
-  deck += List.filled(2, Colors.white);
-  deck.shuffle();
-  return deck;
-}
+typedef GameCards = List<GameCard>;
 
-class PlayerCards extends StateNotifier<List<Color>> {
-  PlayerCards() : super([]);
-
-  void replace(int id, Color color) {
-    state[id] = color;
-  }
-}
-
-extension Game on List<Color> {
-  List<Color> replace(int i, Color x) {
-    List<Color> list = [];
+extension Game on GameCards {
+  GameCards replaceCard(int i, GameCard card) {
+    GameCards cards = [];
     for (var j = 0; j < length; j++) {
       if (j == i) {
-        list.add(x);
+        cards.add(card);
       } else {
-        list.add(this[j]);
+        cards.add(this[j]);
       }
     }
-    return list;
+    return cards;
   }
 
-  List<Color> addCard(Color x) {
-    List<Color> list = [];
+  GameCards addCard(GameCard card) {
+    GameCards cards = [];
     for (var j = 0; j < length; j++) {
-      list.add(this[j]);
+      cards.add(this[j]);
     }
-    list.add(x);
-    return list;
+    cards.add(card);
+    return cards;
   }
   
-  List<Color> removeCard(int i) {
-    List<Color> list = [];
+  GameCards removeCard(int i) {
+    GameCards cards = [];
     for (var j = 0; j < length; j++) {
       if (j != i) {
-        list.add(this[j]);
+        cards.add(this[j]);
       }
     }
-    return list;
+    return cards;
   } 
 }

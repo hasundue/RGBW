@@ -8,11 +8,11 @@ void main() {
 }
 
 final gamePhaseProvider = StateProvider<GamePhase>((ref) => GamePhase.setup);
-final deckProvider = StateNotifierProvider<Deck, List<Color>>((ref) => Deck());
-final playerCardsProvider = StateProvider<List<Color>>((ref) => []);
-final aliceCardsProvider = StateProvider<List<Color>>((ref) => []);
-final fieldCardsProvider = StateProvider<List<Color>>((ref) => []);
-final discardsProvider = StateProvider<List<Color>>((ref) => []);
+final deckProvider = StateNotifierProvider<DeckNotifier, GameCards>((ref) => DeckNotifier());
+final playerCardsProvider = StateProvider<GameCards>((ref) => []);
+final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
+final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
+final discardsProvider = StateProvider<GameCards>((ref) => []);
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -67,11 +67,11 @@ class Home extends ConsumerWidget {
   } // build
 
   void initGame(WidgetRef ref) {
-    final Deck deck = ref.read(deckProvider.notifier);
+    final DeckNotifier deck = ref.read(deckProvider.notifier);
     deck.init();
-    ref.read(playerCardsProvider.notifier).state = deck.deal(4);
-    ref.read(aliceCardsProvider.notifier).state = deck.deal(4);
-    ref.read(fieldCardsProvider.notifier).state = deck.deal(4);
+    for (var provider in [aliceCardsProvider, fieldCardsProvider, playerCardsProvider]) {
+      ref.read(provider.notifier).state = deck.deal(4);
+    }
     ref.read(discardsProvider.notifier).state = [];
     ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
   }
@@ -82,7 +82,7 @@ class AliceCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Color> cards = ref.watch(aliceCardsProvider);
+    final GameCards cards = ref.watch(aliceCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -98,7 +98,7 @@ class FieldCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Color> cards = ref.watch(fieldCardsProvider);
+    final GameCards cards = ref.watch(fieldCardsProvider);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -114,7 +114,7 @@ class PlayerCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<Color> cards = ref.watch(playerCardsProvider);
+    GameCards cards = ref.watch(playerCardsProvider);
     return DragTarget(
       builder: (context, accepted, rejected) {
         return Row(
@@ -125,7 +125,7 @@ class PlayerCards extends ConsumerWidget {
           ],
         );
       },
-      onAccept: (Color data) {
+      onAccept: (GameCard data) {
         ref.read(playerCardsProvider).add(data);
         ref.read(deckProvider.notifier).deal(1);
         ref.read(gamePhaseProvider.notifier).state = GamePhase.discard;
@@ -142,8 +142,8 @@ class AliceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    final Color color = ref.watch(aliceCardsProvider)[id];
-    return ColoredCard(color: color, facedown: true, size: deviceSize);
+    final GameCard card = ref.watch(aliceCardsProvider)[id];
+    return ColoredCard(color: card.color(), facedown: true, size: deviceSize);
   }
 }
 
@@ -155,12 +155,12 @@ class PlayerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    final Color color = ref.watch(playerCardsProvider)[id];
+    final GameCard card = ref.watch(playerCardsProvider)[id];
 
     return Draggable(
-      data: {'id': id, 'color': color},
-      child: ColoredCard(color: color, size: deviceSize),
-      feedback: ColoredCard(color: color, size: deviceSize),
+      data: {'id': id, 'color': card},
+      child: ColoredCard(color: card.color(), size: deviceSize),
+      feedback: ColoredCard(color: card.color(), size: deviceSize),
       childWhenDragging: DummyCard(size: deviceSize),
     );
   }
@@ -175,23 +175,31 @@ class FieldCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
-    final Color color = ref.watch(fieldCardsProvider)[id];
+    final GameCard card = ref.watch(fieldCardsProvider)[id];
 
     if (phase == GamePhase.replace) {
       return DragTarget(
         builder: (context, accepted, rejected) {
-          return ColoredCard(color: color, size: deviceSize);
+          return ColoredCard(color: card.color(), size: deviceSize);
         },
         onAccept: (Map data) {
-          if (data['color'] != color) {
-            ref.read(playerCardsProvider.notifier).update((state) => state.replace(data['id'], color));
-            ref.read(fieldCardsProvider.notifier).update((state) => state.replace(id, data['color']));
+          if (data['color'] != card.color()) {
+            ref.read(playerCardsProvider.notifier).update(
+              (state) {
+                return state.replaceCard(data['id'], card);
+              }
+            );
+            ref.read(fieldCardsProvider.notifier).update(
+              (state) {
+                return state.replaceCard(id, data['color']);
+              }
+            );
             ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
           }
         },
       );
     } else {
-      return ColoredCard(color: color, size: deviceSize);
+      return ColoredCard(color: card.color(), size: deviceSize);
     }
   }
 }
@@ -203,7 +211,7 @@ class DeckCards extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
-    final List<Color> deck = List.from(ref.watch(deckProvider).reversed);
+    final GameCards deck = List.from(ref.watch(deckProvider).reversed);
 
     if (deck.isNotEmpty) {
       return Row(
@@ -211,16 +219,16 @@ class DeckCards extends ConsumerWidget {
           Stack(
             children: [
               for (var i = 0; i < deck.length - 1; i++)
-                ColoredCard(color: deck[i], size: deviceSize, facedown: true),
+                ColoredCard(color: deck[i].color(), size: deviceSize, facedown: true),
               if (phase == GamePhase.draw)
                 Draggable(
                   data: deck.last,
-                  child: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
-                  feedback: ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                  child: ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
+                  feedback: ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
                   childWhenDragging: DummyCard(size: deviceSize),
                 ),
               if (phase != GamePhase.draw)
-                ColoredCard(color: deck.last, size: deviceSize, facedown: true),
+                ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
             ],
           ),
           Text(
@@ -243,11 +251,11 @@ class Discards extends ConsumerWidget {
     final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
 
-    final List<Color> cards = ref.watch(discardsProvider);
+    final GameCards cards = ref.watch(discardsProvider);
 
-    final List<Color> red = cards.where((card) => card == Colors.red).toList();
-    final List<Color> green = cards.where((card) => card == Colors.green).toList();
-    final List<Color> black = cards.where((card) => card == Colors.black).toList();
+    final GameCards red = cards.where((card) => card == GameCard.red).toList();
+    final GameCards green = cards.where((card) => card == GameCard.green).toList();
+    final GameCards black = cards.where((card) => card == GameCard.black).toList();
 
     return DragTarget(
       builder: (context, accepted, rejected) {
@@ -260,7 +268,7 @@ class Discards extends ConsumerWidget {
                     children: [
                       DummyCard(size: deviceSize),
                       for (var i = 0; i < color.length; i++)
-                        ColoredCard(color: color[0], size: deviceSize),
+                        ColoredCard(color: cards[0].color(), size: deviceSize),
                     ],
                   ),
                   if (color.isNotEmpty)
