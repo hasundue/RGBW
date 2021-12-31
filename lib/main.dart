@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:RGBW/card.dart';
 import 'package:RGBW/game.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
-}
-
 final gamePhaseProvider = StateProvider<GamePhase>((ref) => GamePhase.setup);
 final deckProvider = StateNotifierProvider<DeckNotifier, GameCards>((ref) => DeckNotifier());
 final playerCardsProvider = StateProvider<GameCards>((ref) => []);
 final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
 final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
 final discardsProvider = StateProvider<GameCards>((ref) => []);
+
+void main() {
+  runApp(const ProviderScope(child: MyApp()));
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
