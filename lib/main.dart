@@ -268,7 +268,7 @@ class Discards extends ConsumerWidget {
                     children: [
                       DummyCard(size: deviceSize),
                       for (var i = 0; i < color.length; i++)
-                        ColoredCard(color: cards[0].color(), size: deviceSize),
+                        ColoredCard(color: color[0].color(), size: deviceSize),
                     ],
                   ),
                   if (color.isNotEmpty)
