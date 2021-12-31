@@ -204,12 +204,12 @@ class FieldCard extends ConsumerWidget {
         },
         onAccept: (Map data) {
           if (data['color'] != card.color()) {
-            ref.read(playerCardsProvider.notifier).update((state) {
-                return state.replaced(data['id'], card);
-            });
-            ref.read(fieldCardsProvider.notifier).update((state) {
-                return state.replaced(id, data['color']);
-            });
+            ref.read(playerCardsProvider.notifier).update((state) =>
+                state.replaced(data['id'], card)
+            );
+            ref.read(fieldCardsProvider.notifier).update((state) =>
+                state.replaced(id, data['color'])
+            );
             ref.read(gamePhaseProvider.notifier).state = GamePhase.alice;
           }
         },
