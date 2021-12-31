@@ -10,7 +10,7 @@ final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
 final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
 final discardsProvider = StateProvider<GameCards>((ref) => []);
 
-final alicePlayProvider = Provider((ref) {
+final aliceMoveProvider = Provider((ref) {
 });
 
 void main() {
@@ -44,7 +44,7 @@ class Home extends ConsumerWidget {
         GameCards alice = ref.read(aliceCardsProvider);
         GameCards field= ref.read(fieldCardsProvider);
         GameCards discards = ref.read(discardsProvider);
-        AliceMove play = GameStateForAlice(alice, field, discards).alicePlay();
+        AliceMove play = getAliceMove(GameStateForAlice(alice, field, discards));
         GameCard aliceCard = alice[play.aliceCardId];
         GameCard fieldCard = alice[play.fieldCardId];
         ref.read(fieldCardsProvider.notifier).update((state) =>

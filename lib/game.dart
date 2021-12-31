@@ -23,11 +23,6 @@ class GameStateForAlice {
   GameCards discard;
   
   GameStateForAlice(this.alice, this.field, this.discard);
-
-  AliceMove alicePlay() {
-    var rand = Random();
-    return AliceMove(rand.nextInt(4), rand.nextInt(4));
-  }
 }
 
 class AliceMove {
@@ -38,3 +33,8 @@ class AliceMove {
 }
 
 typedef AliceMoves = List<AliceMove>;
+
+AliceMove getAliceMove(GameStateForAlice state) {
+  var rand = Random();
+  return AliceMove(rand.nextInt(4), rand.nextInt(4));
+}
