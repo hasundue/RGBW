@@ -1,5 +1,7 @@
 import 'dart:math';
 
+const int handSize = 4;
+
 enum GamePhase {
   setup,
   draw,
@@ -35,6 +37,25 @@ class AliceMove {
 typedef AliceMoves = List<AliceMove>;
 
 AliceMove getAliceMove(GameStateForAlice state) {
-  var rand = Random();
-  return AliceMove(rand.nextInt(4), rand.nextInt(4));
+  AliceMoves legal = getLegalMoves(state);
+
+  legal.shuffle();
+
+  return legal.first;
+}
+
+AliceMoves getLegalMoves(GameStateForAlice state) {
+  GameCards alice = state.alice;
+  GameCards field = state.field;
+
+  AliceMoves moves = [];
+
+  for (int i = 0; i < handSize; i++) {
+    for (int j = 0; j < handSize; j++) {
+      if (alice[i] != field[j]) {
+        moves.add(AliceMove(i, j));
+      }
+    }
+  }
+  return moves;
 }
