@@ -301,7 +301,7 @@ class Discards extends ConsumerWidget {
         ); // Row
       }, // builder
       onAccept: (Map data) {
-        if (phase == GamePhase.discard) {
+        if (phase == GamePhase.discard && data['color'] != GameCard.white) {
           ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(data['id']));
           ref.read(discardsProvider.notifier).update((state) => state.addCard(data['color']));
           ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
