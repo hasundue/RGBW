@@ -155,7 +155,6 @@ class PlayerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size deviceSize = MediaQuery.of(context).size;
-    final GamePhase phase = ref.read(gamePhaseProvider);
     final Color color = ref.watch(playerCardsProvider)[id];
 
     return Draggable(
