@@ -24,15 +24,17 @@ class GameStateForAlice {
   
   GameStateForAlice(this.alice, this.field, this.discard);
 
-  AlicePlay alicePlay() {
+  AliceMove alicePlay() {
     var rand = Random();
-    return AlicePlay(rand.nextInt(4), rand.nextInt(4));
+    return AliceMove(rand.nextInt(4), rand.nextInt(4));
   }
 }
 
-class AlicePlay {
+class AliceMove {
   int aliceCardId;
   int fieldCardId;
 
-  AlicePlay(this.aliceCardId, this.fieldCardId);
+  AliceMove(this.aliceCardId, this.fieldCardId);
 }
+
+typedef AliceMoves = List<AliceMove>;

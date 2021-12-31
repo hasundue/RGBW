@@ -44,7 +44,7 @@ class Home extends ConsumerWidget {
         GameCards alice = ref.read(aliceCardsProvider);
         GameCards field= ref.read(fieldCardsProvider);
         GameCards discards = ref.read(discardsProvider);
-        AlicePlay play = GameStateForAlice(alice, field, discards).alicePlay();
+        AliceMove play = GameStateForAlice(alice, field, discards).alicePlay();
         GameCard aliceCard = alice[play.aliceCardId];
         GameCard fieldCard = alice[play.fieldCardId];
         ref.read(fieldCardsProvider.notifier).update((state) =>
