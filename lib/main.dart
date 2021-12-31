@@ -53,18 +53,18 @@ class Home extends ConsumerWidget {
                     Discards(),
                     DeckCards(),
                   ],
-                ),
+                ), // Row
               ],
-            ),
+            ), // Column
           ],
-        ),
-      ),
+        ), // Row
+      ), // Center
       floatingActionButton: FloatingActionButton (
         onPressed: () => initGame(ref),
         child: const Icon(Icons.play_arrow_rounded)
       ),
-    );
-  }
+    ); // Scaffold
+  } // build
 
   void initGame(WidgetRef ref) {
     final Deck deck = ref.read(deckProvider.notifier);
@@ -228,11 +228,11 @@ class DeckCards extends ConsumerWidget {
             style: const TextStyle(fontSize: 20),
           ),
         ],
-      );
+      ); // Row
     } else {
       return DummyCard(size: deviceSize);
     }
-  }
+  } // build
 }
 
 class Discards extends ConsumerWidget {
