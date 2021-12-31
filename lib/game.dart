@@ -1,3 +1,5 @@
+import 'dart:math';
+
 enum GamePhase {
   setup,
   draw,
@@ -15,35 +17,22 @@ enum GameCard {
 
 typedef GameCards = List<GameCard>;
 
-extension Game on GameCards {
-  GameCards replaceCard(int i, GameCard card) {
-    GameCards cards = [];
-    for (var j = 0; j < length; j++) {
-      if (j == i) {
-        cards.add(card);
-      } else {
-        cards.add(this[j]);
-      }
-    }
-    return cards;
-  }
-
-  GameCards addCard(GameCard card) {
-    GameCards cards = [];
-    for (var j = 0; j < length; j++) {
-      cards.add(this[j]);
-    }
-    cards.add(card);
-    return cards;
-  }
+class GameStateForAlice {
+  GameCards alice;
+  GameCards field;
+  GameCards discard;
   
-  GameCards removeCard(int i) {
-    GameCards cards = [];
-    for (var j = 0; j < length; j++) {
-      if (j != i) {
-        cards.add(this[j]);
-      }
-    }
-    return cards;
-  } 
+  GameStateForAlice(this.alice, this.field, this.discard);
+
+  AlicePlay alicePlay() {
+    var rand = Random();
+    return AlicePlay(rand.nextInt(4), rand.nextInt(4));
+  }
+}
+
+class AlicePlay {
+  int aliceCardId;
+  int fieldCardId;
+
+  AlicePlay(this.aliceCardId, this.fieldCardId);
 }

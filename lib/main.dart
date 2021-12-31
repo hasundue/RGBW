@@ -10,6 +10,9 @@ final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
 final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
 final discardsProvider = StateProvider<GameCards>((ref) => []);
 
+final alicePlayProvider = Provider((ref) {
+});
+
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -34,6 +37,26 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    // Alice
+    ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
+      if (newPhase == GamePhase.alice) {
+        GameCards alice = ref.read(aliceCardsProvider);
+        GameCards field= ref.read(fieldCardsProvider);
+        GameCards discards = ref.read(discardsProvider);
+        AlicePlay play = GameStateForAlice(alice, field, discards).alicePlay();
+        GameCard aliceCard = alice[play.aliceCardId];
+        GameCard fieldCard = alice[play.fieldCardId];
+        ref.read(fieldCardsProvider.notifier).update((state) =>
+          state.replaceCard(play.fieldCardId, aliceCard)
+        );
+        ref.read(aliceCardsProvider.notifier).update((state) =>
+          state.replaceCard(play.aliceCardId, fieldCard)
+        );
+        ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('RGBW - Red Green Black and White'),
@@ -184,17 +207,13 @@ class FieldCard extends ConsumerWidget {
         },
         onAccept: (Map data) {
           if (data['color'] != card.color()) {
-            ref.read(playerCardsProvider.notifier).update(
-              (state) {
+            ref.read(playerCardsProvider.notifier).update((state) {
                 return state.replaceCard(data['id'], card);
-              }
-            );
-            ref.read(fieldCardsProvider.notifier).update(
-              (state) {
+            });
+            ref.read(fieldCardsProvider.notifier).update((state) {
                 return state.replaceCard(id, data['color']);
-              }
-            );
-            ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+            });
+            ref.read(gamePhaseProvider.notifier).state = GamePhase.alice;
           }
         },
       );
