@@ -10,9 +10,6 @@ final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
 final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
 final discardsProvider = StateProvider<GameCards>((ref) => []);
 
-final aliceMoveProvider = Provider((ref) {
-});
-
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
