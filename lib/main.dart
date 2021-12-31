@@ -45,10 +45,10 @@ class Home extends ConsumerWidget {
         GameCard aliceCard = alice[play.aliceCardId];
         GameCard fieldCard = alice[play.fieldCardId];
         ref.read(fieldCardsProvider.notifier).update((state) =>
-          state.replaceCard(play.fieldCardId, aliceCard)
+          state.replaced(play.fieldCardId, aliceCard)
         );
         ref.read(aliceCardsProvider.notifier).update((state) =>
-          state.replaceCard(play.aliceCardId, fieldCard)
+          state.replaced(play.aliceCardId, fieldCard)
         );
         ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
       }
@@ -205,10 +205,10 @@ class FieldCard extends ConsumerWidget {
         onAccept: (Map data) {
           if (data['color'] != card.color()) {
             ref.read(playerCardsProvider.notifier).update((state) {
-                return state.replaceCard(data['id'], card);
+                return state.replaced(data['id'], card);
             });
             ref.read(fieldCardsProvider.notifier).update((state) {
-                return state.replaceCard(id, data['color']);
+                return state.replaced(id, data['color']);
             });
             ref.read(gamePhaseProvider.notifier).state = GamePhase.alice;
           }
@@ -299,8 +299,8 @@ class Discards extends ConsumerWidget {
       }, // builder
       onAccept: (Map data) {
         if (phase == GamePhase.discard && data['color'] != GameCard.white) {
-          ref.read(playerCardsProvider.notifier).update((state) => state.removeCard(data['id']));
-          ref.read(discardsProvider.notifier).update((state) => state.addCard(data['color']));
+          ref.read(playerCardsProvider.notifier).update((state) => state.removed(data['id']));
+          ref.read(discardsProvider.notifier).update((state) => state.added(data['color']));
           ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
         }
       },
