@@ -34,6 +34,7 @@ class Home extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final GamePhase phase = ref.read(gamePhaseProvider);
 
     ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
@@ -66,6 +67,14 @@ class Home extends ConsumerWidget {
 
       // Is player winner?
       if (newPhase == GamePhase.draw) {
+        GameCards player = ref.read(playerCardsProvider);
+        GameCards field = ref.read(fieldCardsProvider);
+        GameCards discards = ref.read(discardsProvider);
+        GameStateForPlayer state = GameStateForPlayer(player, field, discards);
+
+        if (isPlayerWinner(state)) {
+          ref.read(gamePhaseProvider.notifier).state = GamePhase.playerWin;
+        }
       }
     });
 

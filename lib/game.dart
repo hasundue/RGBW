@@ -7,6 +7,7 @@ enum GamePhase {
   replace,
   alice,
   aliceWin,
+  playerWin,
 }
 
 enum GameCard {
@@ -126,4 +127,16 @@ bool isMatched(GameCards hand, GameCards field) {
   else {
     return false;
   }
+}
+
+bool isPlayerWinner(GameStateForPlayer state) {
+  return isMatched(state.player, state.field);
+}
+
+class GameStateForPlayer {
+  GameCards player;
+  GameCards field;
+  GameCards discards;
+
+  GameStateForPlayer(this.player, this.field, this.discards);
 }
