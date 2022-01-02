@@ -35,25 +35,37 @@ class Home extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    // Alice' Move
     ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
         GameCards alice = ref.read(aliceCardsProvider);
         GameCards field= ref.read(fieldCardsProvider);
         GameCards discards = ref.read(discardsProvider);
 
-        AliceMove play = getAliceMove(GameStateForAlice(alice, field, discards));
+        GameStateForAlice state = GameStateForAlice(alice, field, discards);
 
-        GameCard aliceCard = alice[play.aliceCardId];
-        GameCard fieldCard = alice[play.fieldCardId];
+        // Is Alice winner?
+        if (isAliceWinner(state)) {
+          ref.read(gamePhaseProvider.notifier).state = GamePhase.aliceWin;
+        }
+        else {
+          // Alice's move
+          AliceMove play = getAliceMove(state);
 
-        ref.read(fieldCardsProvider.notifier).update((state) =>
-          state.replaced(play.fieldCardId, aliceCard)
-        );
-        ref.read(aliceCardsProvider.notifier).update((state) =>
-          state.replaced(play.aliceCardId, fieldCard)
-        );
-        ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+          GameCard aliceCard = alice[play.aliceCardId];
+          GameCard fieldCard = alice[play.fieldCardId];
+
+          ref.read(fieldCardsProvider.notifier).update((state) =>
+            state.replaced(play.fieldCardId, aliceCard)
+          );
+          ref.read(aliceCardsProvider.notifier).update((state) =>
+            state.replaced(play.aliceCardId, fieldCard)
+          );
+          ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+        }
+      }
+
+      // Is player winner?
+      if (newPhase == GamePhase.draw) {
       }
     });
 
@@ -164,9 +176,10 @@ class AliceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final GamePhase phase = ref.watch(gamePhaseProvider);
     final Size deviceSize = MediaQuery.of(context).size;
     final GameCard card = ref.watch(aliceCardsProvider)[id];
-    return ColoredCard(color: card.color(), facedown: true, size: deviceSize);
+    return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin, size: deviceSize);
   }
 }
 

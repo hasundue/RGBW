@@ -6,6 +6,7 @@ enum GamePhase {
   discard,
   replace,
   alice,
+  aliceWin,
 }
 
 enum GameCard {
@@ -35,6 +36,24 @@ extension Game on GameCards {
     cards.removeAt(i);
     return cards;
   } 
+
+  List<int> composition() {
+    List<int> comp = [];
+    for (var color in GameCard.values) {
+      comp[color.index] = where((card) => card == color).length;
+    }
+    return comp;
+  }
+
+  GameCards diff(GameCards cards) {
+    GameCards cards = [];
+    for (var color in GameCard.values) {
+      int n = composition()[color.index];
+      int m = cards.composition()[color.index];
+      cards += List.filled((n - m).abs(), color);
+    }
+    return cards.where((card) => card != GameCard.white).toList();
+  }
 }
 
 class GameStateForAlice {
@@ -85,4 +104,26 @@ AliceMoves getLegalMoves(GameStateForAlice state) {
     }
   }
   return moves;
+}
+
+bool isAliceWinner(GameStateForAlice state) {
+  return isMatched(state.alice, state.field);
+}
+
+bool isMatched(GameCards hand, GameCards field) {
+  if (hand.contains(GameCard.white)) {
+    return false;
+  }
+
+  GameCards diff = hand.diff(field);
+
+  if (diff.isEmpty) {
+    return true;
+  }
+  else if (diff.length == field.composition()[GameCard.white.index]) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
