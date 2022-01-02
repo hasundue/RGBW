@@ -35,15 +35,18 @@ class Home extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    // Alice
+    // Alice' Move
     ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
         GameCards alice = ref.read(aliceCardsProvider);
         GameCards field= ref.read(fieldCardsProvider);
         GameCards discards = ref.read(discardsProvider);
+
         AliceMove play = getAliceMove(GameStateForAlice(alice, field, discards));
+
         GameCard aliceCard = alice[play.aliceCardId];
         GameCard fieldCard = alice[play.fieldCardId];
+
         ref.read(fieldCardsProvider.notifier).update((state) =>
           state.replaced(play.fieldCardId, aliceCard)
         );
