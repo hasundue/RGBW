@@ -51,16 +51,16 @@ class Home extends ConsumerWidget {
         }
         else {
           // Alice's move
-          AliceMove play = getAliceMove(state);
+          AliceMove move = getAliceMove(state);
 
-          GameCard aliceCard = alice[play.aliceCardId];
-          GameCard fieldCard = field[play.fieldCardId];
+          GameCard aliceCard = alice[move.aliceCardId];
+          GameCard fieldCard = field[move.fieldCardId];
 
           ref.read(fieldCardsProvider.notifier).update((state) =>
-            state.replaced(play.fieldCardId, aliceCard)
+            state.replaced(move.fieldCardId, aliceCard)
           );
           ref.read(aliceCardsProvider.notifier).update((state) =>
-            state.replaced(play.aliceCardId, fieldCard)
+            state.replaced(move.aliceCardId, fieldCard)
           );
 
           // Is player winner?
