@@ -40,7 +40,7 @@ class Home extends ConsumerWidget {
     ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
         GameCards alice = ref.read(aliceCardsProvider);
-        GameCards field= ref.read(fieldCardsProvider);
+        GameCards field = ref.read(fieldCardsProvider);
         GameCards discards = ref.read(discardsProvider);
 
         GameStateForAlice state = GameStateForAlice(alice, field, discards);
@@ -54,7 +54,7 @@ class Home extends ConsumerWidget {
           AliceMove play = getAliceMove(state);
 
           GameCard aliceCard = alice[play.aliceCardId];
-          GameCard fieldCard = alice[play.fieldCardId];
+          GameCard fieldCard = field[play.fieldCardId];
 
           ref.read(fieldCardsProvider.notifier).update((state) =>
             state.replaced(play.fieldCardId, aliceCard)
@@ -65,9 +65,9 @@ class Home extends ConsumerWidget {
 
           // Is player winner?
           GameCards player = ref.read(playerCardsProvider);
-          GameCards field = ref.read(fieldCardsProvider);
-          GameCards discards = ref.read(discardsProvider);
-          GameStateForPlayer playerstate = GameStateForPlayer(player, field, discards);
+          GameCards newField = ref.read(fieldCardsProvider);
+          GameCards newDiscards = ref.read(discardsProvider);
+          GameStateForPlayer playerstate = GameStateForPlayer(player, newField, newDiscards);
 
           if (isPlayerWinner(playerstate)) {
             ref.read(gamePhaseProvider.notifier).state = GamePhase.playerWin;
