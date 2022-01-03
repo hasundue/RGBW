@@ -62,19 +62,19 @@ class Home extends ConsumerWidget {
           ref.read(aliceCardsProvider.notifier).update((state) =>
             state.replaced(play.aliceCardId, fieldCard)
           );
-          ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
-        }
-      }
 
-      // Is player winner?
-      if (newPhase == GamePhase.draw) {
-        GameCards player = ref.read(playerCardsProvider);
-        GameCards field = ref.read(fieldCardsProvider);
-        GameCards discards = ref.read(discardsProvider);
-        GameStateForPlayer state = GameStateForPlayer(player, field, discards);
+          // Is player winner?
+          GameCards player = ref.read(playerCardsProvider);
+          GameCards field = ref.read(fieldCardsProvider);
+          GameCards discards = ref.read(discardsProvider);
+          GameStateForPlayer playerstate = GameStateForPlayer(player, field, discards);
 
-        if (isPlayerWinner(state)) {
-          ref.read(gamePhaseProvider.notifier).state = GamePhase.playerWin;
+          if (isPlayerWinner(playerstate)) {
+            ref.read(gamePhaseProvider.notifier).state = GamePhase.playerWin;
+          }
+          else {
+            ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+          }
         }
       }
     });
