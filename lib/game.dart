@@ -41,19 +41,37 @@ extension Game on GameCards {
   List<int> composition() {
     List<int> comp = [];
     for (var color in GameCard.values) {
-      comp[color.index] = where((card) => card == color).length;
+      comp.add(where((card) => card == color).length);
     }
     return comp;
   }
 
   GameCards diff(GameCards cards) {
-    GameCards cards = [];
+    GameCards diff = [];
     for (var color in GameCard.values) {
       int n = composition()[color.index];
       int m = cards.composition()[color.index];
-      cards += List.filled((n - m).abs(), color);
+      diff += List.filled((n - m).abs(), color);
     }
-    return cards.where((card) => card != GameCard.white).toList();
+    return diff.where((card) => card != GameCard.white).toList();
+  }
+
+  bool isMatched(GameCards field) {
+    if (contains(GameCard.white)) {
+      return false;
+    }
+
+    GameCards diff = this.diff(field);
+
+    if (diff.isEmpty) {
+      return true;
+    }
+    else if (diff.length == field.composition()[GameCard.white.index]) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 }
 
@@ -108,29 +126,11 @@ AliceMoves getLegalMoves(GameStateForAlice state) {
 }
 
 bool isAliceWinner(GameStateForAlice state) {
-  return isMatched(state.alice, state.field);
-}
-
-bool isMatched(GameCards hand, GameCards field) {
-  if (hand.contains(GameCard.white)) {
-    return false;
-  }
-
-  GameCards diff = hand.diff(field);
-
-  if (diff.isEmpty) {
-    return true;
-  }
-  else if (diff.length == field.composition()[GameCard.white.index]) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  return state.alice.isMatched(state.field);
 }
 
 bool isPlayerWinner(GameStateForPlayer state) {
-  return isMatched(state.player, state.field);
+  return state.player.isMatched(state.field);
 }
 
 class GameStateForPlayer {
