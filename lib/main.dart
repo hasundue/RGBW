@@ -35,6 +35,8 @@ class Home extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    GamePhase phase = ref.watch(gamePhaseProvider);
+
     ref.listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
         GameCards alice = ref.read(aliceCardsProvider);
@@ -88,6 +90,8 @@ class Home extends ConsumerWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                if (phase != GamePhase.setup)
+                  const Alice(),
                 const AliceCards(),
                 const FieldCards(),
                 const PlayerCards(),
@@ -117,6 +121,52 @@ class Home extends ConsumerWidget {
     }
     ref.read(discardsProvider.notifier).state = [];
     ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+  }
+}
+
+class Alice extends ConsumerWidget {
+  const Alice({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Size deviceSize = MediaQuery.of(context).size;
+    final GamePhase phase = ref.watch(gamePhaseProvider);
+
+    return Column(
+      children: [
+        Icon(
+          aliceFace(phase),
+          color: Colors.blue,
+          size: deviceSize.height * 0.08,
+        ),
+        Text(
+          aliceMessage(phase),
+          style: const TextStyle(fontSize: 20),
+        ),
+      ],
+    );
+  }
+
+  IconData aliceFace(GamePhase phase) {
+    switch (phase) {
+      case GamePhase.aliceWin:
+        return Icons.sentiment_very_satisfied_outlined;
+      case GamePhase.playerWin:
+        return Icons.sentiment_satisfied_alt;
+      default:
+        return Icons.sentiment_satisfied;
+    }
+  }
+
+  String aliceMessage(GamePhase phase) {
+    switch (phase) {
+      case GamePhase.aliceWin:
+        return 'I won!';
+      case GamePhase.playerWin:
+        return 'You won!';
+      default:
+        return '';
+    }
   }
 }
 
