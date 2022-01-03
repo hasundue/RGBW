@@ -234,10 +234,11 @@ class AliceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GamePhase phase = ref.watch(gamePhaseProvider);
+    // final GamePhase phase = ref.watch(gamePhaseProvider);
     final Size deviceSize = MediaQuery.of(context).size;
     final GameCard card = ref.watch(aliceCardsProvider)[id];
-    return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin, size: deviceSize);
+    // return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin, size: deviceSize);
+    return ColoredCard(color: card.color(), size: deviceSize);
   }
 }
 
