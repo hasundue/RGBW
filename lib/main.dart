@@ -145,10 +145,9 @@ class AliceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // final GamePhase phase = ref.watch(gamePhaseProvider);
-    final Size deviceSize = MediaQuery.of(context).size;
     final GameCard card = ref.watch(aliceCardsProvider)[id];
-    // return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin, size: deviceSize);
-    return ColoredCard(color: card.color(), size: deviceSize);
+    // return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin);
+    return ColoredCard(color: card.color());
   }
 }
 
@@ -159,14 +158,13 @@ class PlayerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Size deviceSize = MediaQuery.of(context).size;
     final GameCard card = ref.watch(playerCardsProvider)[id];
 
     return Draggable(
       data: {'id': id, 'color': card},
-      child: ColoredCard(color: card.color(), size: deviceSize),
-      feedback: ColoredCard(color: card.color(), size: deviceSize),
-      childWhenDragging: DummyCard(size: deviceSize),
+      child: ColoredCard(color: card.color()),
+      feedback: ColoredCard(color: card.color()),
+      childWhenDragging: const ColoredCard(show: false),
     );
   }
 }
@@ -178,14 +176,13 @@ class FieldCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
     final GameCard card = ref.watch(fieldCardsProvider)[id];
 
     if (phase == GamePhase.replace) {
       return DragTarget(
         builder: (context, accepted, rejected) {
-          return ColoredCard(color: card.color(), size: deviceSize);
+          return ColoredCard(color: card.color());
         },
         onAccept: (Map data) {
           if (data['color'] != card.color()) {
@@ -200,7 +197,7 @@ class FieldCard extends ConsumerWidget {
         },
       );
     } else {
-      return ColoredCard(color: card.color(), size: deviceSize);
+      return ColoredCard(color: card.color());
     }
   }
 }
@@ -210,7 +207,6 @@ class DeckCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
     final GameCards deck = List.from(ref.watch(deckProvider).reversed);
 
@@ -220,16 +216,16 @@ class DeckCards extends ConsumerWidget {
           Stack(
             children: [
               for (var i = 0; i < deck.length - 1; i++)
-                ColoredCard(color: deck[i].color(), size: deviceSize, facedown: true),
+                ColoredCard(color: deck[i].color(), facedown: true),
               if (phase == GamePhase.draw)
                 Draggable(
                   data: deck.last,
-                  child: ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
-                  feedback: ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
-                  childWhenDragging: DummyCard(size: deviceSize),
+                  child: ColoredCard(color: deck.last.color(), facedown: true),
+                  feedback: ColoredCard(color: deck.last.color(), facedown: true),
+                  childWhenDragging: const ColoredCard(show: false),
                 ),
               if (phase != GamePhase.draw)
-                ColoredCard(color: deck.last.color(), size: deviceSize, facedown: true),
+                ColoredCard(color: deck.last.color(), facedown: true),
             ],
           ),
           Text(
@@ -239,7 +235,7 @@ class DeckCards extends ConsumerWidget {
         ],
       ); // Row
     } else {
-      return DummyCard(size: deviceSize);
+      return const ColoredCard(show: false);
     }
   } // build
 }
@@ -249,7 +245,6 @@ class Discards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Size deviceSize = MediaQuery.of(context).size;
     final GamePhase phase = ref.watch(gamePhaseProvider);
 
     final GameCards cards = ref.watch(discardsProvider);
@@ -267,9 +262,9 @@ class Discards extends ConsumerWidget {
                 children: [ 
                   Stack(
                     children: [
-                      DummyCard(size: deviceSize),
+                      const ColoredCard(show: false),
                       for (var i = 0; i < color.length; i++)
-                        ColoredCard(color: color[0].color(), size: deviceSize),
+                        ColoredCard(color: color[0].color()),
                     ],
                   ),
                   if (color.isNotEmpty)

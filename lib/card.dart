@@ -4,30 +4,44 @@ import 'package:RGBW/game.dart';
 const heightRatio = 0.12;
 const widthRatio = heightRatio * 0.8;
 
-class ColoredCard extends SizedBox {
-  ColoredCard({Key? key,
-               Color color = Colors.blue,
-               Size size = const Size(1280, 800),
-               bool facedown = false,
-               bool rotated = false})
-  : super(
-    key: key,
-    child: Card(
-      color: facedown ? Colors.blue : color,
-      elevation: 2,
-    ),
-    width: size.height * (rotated ? heightRatio : widthRatio),
-    height: size.height * (rotated ? widthRatio : heightRatio),
-  );
-}
-
 @immutable
-class DummyCard extends SizedBox {
-  DummyCard({Key? key, Size size = const Size(1280, 800)}) : super(
-    key: key,
-    width: size.height * widthRatio,
-    height: size.height * heightRatio,
-  );
+class ColoredCard extends StatelessWidget {
+  final Color color;
+  final bool facedown;
+  final bool rotated;
+  final bool show;
+
+  const ColoredCard({
+    Key? key,
+    this.color = Colors.blue,
+    this.facedown = false,
+    this.rotated = false,
+    this.show = true,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final Size deviceSize = MediaQuery.of(context).size;
+    final width = deviceSize.height * (rotated ? heightRatio : widthRatio);
+    final height = deviceSize.height * (rotated ? widthRatio : heightRatio);
+
+    if (show) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Card(
+          color: facedown ? Colors.blue : color,
+          elevation: 2,
+        ),
+      );
+    }
+    else {
+      return SizedBox(
+        width: width,
+        height: height,
+      );
+    }
+  }
 }
 
 typedef ColorCards = List<Color>;
