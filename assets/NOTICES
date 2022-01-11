@@ -4746,7 +4746,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 charcode
 http_parser
-path
 pool
 shelf_web_socket
 source_maps
@@ -8179,6 +8178,7 @@ freely, subject to the following restrictions:
 --------------------------------------------------------------------------------
 glob
 matcher
+path
 pub_semver
 shelf
 test
