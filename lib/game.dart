@@ -75,6 +75,32 @@ extension Game on GameCards {
   }
 }
 
+class GameState {
+  GamePhase phase = GamePhase.setup;
+  late GameCards deck;
+  late GameCards alice;
+  late GameCards field;
+  late GameCards player;
+  GameCards discard = [];
+
+  GameState() {
+    deck = List.filled(6, GameCard.red);
+    deck += List.filled(6, GameCard.green);
+    deck += List.filled(6, GameCard.black);
+    deck += List.filled(2, GameCard.white);
+    deck.shuffle();
+
+    alice = deck.sublist(0, handSize);
+    deck = deck.sublist(handSize);
+
+    field = deck.sublist(0, handSize);
+    deck = deck.sublist(handSize);
+
+    player = deck.sublist(0, handSize);
+    deck = deck.sublist(handSize);
+  }
+}
+
 class GameStateForAlice {
   GameCards alice;
   GameCards field;

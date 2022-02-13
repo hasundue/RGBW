@@ -8,6 +8,14 @@ final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
 final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
 final discardsProvider = StateProvider<GameCards>((ref) => []);
 
+final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>((ref) =>
+    GameStateNotifier()
+);
+
+class GameStateNotifier extends StateNotifier<GameState> {
+  GameStateNotifier() : super(GameState());
+}
+
 class DeckNotifier extends StateNotifier<GameCards> {
   DeckNotifier() : super([]);
 
