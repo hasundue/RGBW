@@ -1,4 +1,7 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter/foundation.dart';
+
+part 'game.freezed.dart';
 
 const int handSize = 4;
 
@@ -77,23 +80,15 @@ extension Game on GameCards {
   }
 }
 
-GameCards initDeck() {
-  var deck = List.filled(6, GameCard.red);
-  deck += List.filled(6, GameCard.green);
-  deck += List.filled(6, GameCard.black);
-  deck += List.filled(2, GameCard.white);
-  deck.shuffle();
-  return deck;
-}
-
-@immutable
-class GameState {
-  final GamePhase phase = GamePhase.setup;
-  final GameCards deck = initDeck();
-  final GameCards alice = [];
-  final GameCards field = [];
-  final GameCards player = [];
-  final GameCards discard = [];
+@freezed
+class GameState with _$GameState {
+  factory GameState(
+    GameCards deck,
+    GameCards alice,
+    GameCards field,
+    GameCards player,
+    GameCards discards,
+  ) = _GameState;
 }
 
 class GameStateForAlice {

@@ -2,22 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:RGBW/game.dart';
 
 final gamePhaseProvider = StateProvider<GamePhase>((ref) => GamePhase.setup);
-final deckProvider = StateNotifierProvider<DeckNotifier, GameCards>((ref) => DeckNotifier());
-final playerCardsProvider = StateProvider<GameCards>((ref) => []);
-final aliceCardsProvider = StateProvider<GameCards>((ref) => []);
-final fieldCardsProvider = StateProvider<GameCards>((ref) => []);
-final discardsProvider = StateProvider<GameCards>((ref) => []);
 
 final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>((ref) =>
     GameStateNotifier()
 );
 
 class GameStateNotifier extends StateNotifier<GameState> {
-  GameStateNotifier() : super(GameState());
-}
-
-class DeckNotifier extends StateNotifier<GameCards> {
-  DeckNotifier() : super([]);
+  GameStateNotifier() : super(GameState([], [], [], [], []));
 
   void init() {
     GameCards deck = List.filled(6, GameCard.red);
@@ -25,20 +16,60 @@ class DeckNotifier extends StateNotifier<GameCards> {
     deck += List.filled(6, GameCard.black);
     deck += List.filled(2, GameCard.white);
     deck.shuffle();
-    state = deck;
+
+    state = GameState(deck, [], [], [], []);
+
+    dealToAlice(handSize);
+    dealToField(handSize);
+    dealToPlayer(handSize);
   }
 
-  GameCards deal(int n) {
-    var dealed = state.sublist(0, n);
-    state = state.sublist(n);
-    return dealed;
+  void dealToAlice(int n) {
+    state = state.copyWith(
+      deck: state.deck.sublist(n), 
+      alice: state.deck.sublist(0, n)
+    );
   }
-}
 
-class PlayerCards extends StateNotifier<GameCards> {
-  PlayerCards() : super([]);
+  void dealToField(int n) {
+    state = state.copyWith(
+      deck: state.deck.sublist(n), 
+      field: state.deck.sublist(0, n)
+    );
+  }
 
-  void replace(int id, GameCard card) {
-    state[id] = card;
+  void dealToPlayer(int n) {
+    state = state.copyWith(
+      deck: state.deck.sublist(n),
+      player: state.deck.sublist(0, n)
+    );
+  }
+
+  void draw() {
+    state = state.copyWith(
+      deck: state.deck.sublist(1),
+      player: state.player.added(state.deck[0])
+    );
+  }
+
+  void discard(int i) {
+    state = state.copyWith(
+      player: state.player.removed(i),
+      discard: state.discard.added(state.player[i])
+    );
+  }
+
+  void exchangeAlice(int alice, int field) {
+    state = state.copyWith(
+      alice: state.player.replaced(alice, state.field[field]),
+      field: state.player.replaced(field, state.alice[alice])
+    );
+  }
+
+  void exchangePlayer(int playerCardNum, int fieldCardNum) {
+    state = state.copyWith(
+      player: state.player.replaced(playerCardNum, state.field[fieldCardNum]),
+      field: state.player.replaced(fieldCardNum, state.player[playerCardNum])
+    );
   }
 }

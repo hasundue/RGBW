@@ -6,8 +6,8 @@ extension GameMaster on WidgetRef {
   void setGameMaster() {
     listen<GamePhase>(gamePhaseProvider, (GamePhase? previousPhase, GamePhase newPhase) {
       if (newPhase == GamePhase.alice) {
-        GameCards alice = read(aliceCardsProvider);
-        GameCards field = read(fieldCardsProvider);
+        GameCards alice = read(gameStateProvider).alice;
+        GameCards field = read(gameStateProvider);
         GameCards discards = read(discardsProvider);
 
         GameStateForAlice state = GameStateForAlice(alice, field, discards);
@@ -23,16 +23,16 @@ extension GameMaster on WidgetRef {
           GameCard aliceCard = alice[move.aliceCardId];
           GameCard fieldCard = field[move.fieldCardId];
 
-          read(fieldCardsProvider.notifier).update((state) =>
+          read(gameStateProvider.notifier).update((state) =>
               state.replaced(move.fieldCardId, aliceCard)
           );
-          read(aliceCardsProvider.notifier).update((state) =>
+          read(gameStateProvider.notifier).update((state) =>
               state.replaced(move.aliceCardId, fieldCard)
           );
 
           // Is player winner?
           GameCards player = read(playerCardsProvider);
-          GameCards newField = read(fieldCardsProvider);
+          GameCards newField = read(gameStateProvider);
           GameCards newDiscards = read(discardsProvider);
           GameStateForPlayer playerstate = GameStateForPlayer(player, newField, newDiscards);
 

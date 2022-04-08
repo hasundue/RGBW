@@ -4,7 +4,6 @@ import 'package:RGBW/card.dart';
 import 'package:RGBW/game.dart';
 import 'package:RGBW/provider.dart';
 import 'package:RGBW/gamemaster.dart';
-import 'package:RGBW/alice.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -33,8 +32,6 @@ class Home extends ConsumerWidget {
 
     ref.setGameMaster();
 
-    GamePhase phase = ref.watch(gamePhaseProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('RGBW - Red Green Black and White'),
@@ -46,8 +43,6 @@ class Home extends ConsumerWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                if (phase != GamePhase.setup)
-                  const Alice(),
                 const AliceCards(),
                 const FieldCards(),
                 const PlayerCards(),
@@ -70,13 +65,7 @@ class Home extends ConsumerWidget {
   } // build
 
   void initGame(WidgetRef ref) {
-    final DeckNotifier deck = ref.read(deckProvider.notifier);
-    deck.init();
-    for (var provider in [aliceCardsProvider, fieldCardsProvider, playerCardsProvider]) {
-      ref.read(provider.notifier).state = deck.deal(4);
-    }
-    ref.read(discardsProvider.notifier).state = [];
-    ref.read(gamePhaseProvider.notifier).state = GamePhase.draw;
+    ref.read(gameStateProvider.notifier).init();
   }
 }
 
@@ -85,7 +74,7 @@ class AliceCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GameCards cards = ref.watch(aliceCardsProvider);
+    final GameCards cards = ref.watch(gameStateProvider).alice;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -101,7 +90,7 @@ class FieldCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GameCards cards = ref.watch(fieldCardsProvider);
+    final GameCards cards = ref.watch(gameStateProvider).field;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -117,7 +106,7 @@ class PlayerCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    GameCards cards = ref.watch(playerCardsProvider);
+    GameCards cards = ref.watch(gameStateProvider).player;
     return DragTarget(
       builder: (context, accepted, rejected) {
         return Row(
@@ -129,9 +118,7 @@ class PlayerCards extends ConsumerWidget {
         );
       },
       onAccept: (GameCard data) {
-        ref.read(playerCardsProvider).add(data);
-        ref.read(deckProvider.notifier).deal(1);
-        ref.read(gamePhaseProvider.notifier).state = GamePhase.discard;
+        ref.read(gameStateProvider.notifier).draw();
       },
     );
   }
@@ -145,7 +132,7 @@ class AliceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // final GamePhase phase = ref.watch(gamePhaseProvider);
-    final GameCard card = ref.watch(aliceCardsProvider)[id];
+    final GameCard card = ref.watch(gameStateProvider).alice[id];
     // return ColoredCard(color: card.color(), facedown: phase != GamePhase.aliceWin);
     return ColoredCard(color: card.color());
   }
@@ -158,7 +145,7 @@ class PlayerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GameCard card = ref.watch(playerCardsProvider)[id];
+    final GameCard card = ref.watch(gameStateProvider).player[id];
 
     return Draggable(
       data: {'id': id, 'color': card},
@@ -177,7 +164,7 @@ class FieldCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final GamePhase phase = ref.watch(gamePhaseProvider);
-    final GameCard card = ref.watch(fieldCardsProvider)[id];
+    final GameCard card = ref.watch(gameStateProvider).field[id];
 
     if (phase == GamePhase.replace) {
       return DragTarget(
@@ -186,12 +173,7 @@ class FieldCard extends ConsumerWidget {
         },
         onAccept: (Map data) {
           if (data['color'] != card.color()) {
-            ref.read(playerCardsProvider.notifier).update((state) =>
-                state.replaced(data['id'], card)
-            );
-            ref.read(fieldCardsProvider.notifier).update((state) =>
-                state.replaced(id, data['color'])
-            );
+            ref.read(gameStateProvider.notifier).exchangePlayer(data['id'], id);
             ref.read(gamePhaseProvider.notifier).state = GamePhase.alice;
           }
         },
@@ -208,7 +190,7 @@ class DeckCards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final GamePhase phase = ref.watch(gamePhaseProvider);
-    final GameCards deck = List.from(ref.watch(deckProvider).reversed);
+    final GameCards deck = List.from(ref.watch(gameStateProvider).deck.reversed);
 
     if (deck.isNotEmpty) {
       return Row(
@@ -247,7 +229,7 @@ class Discards extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final GamePhase phase = ref.watch(gamePhaseProvider);
 
-    final GameCards cards = ref.watch(discardsProvider);
+    final GameCards cards = ref.watch(gameStateProvider).discards;
 
     final GameCards red = cards.where((card) => card == GameCard.red).toList();
     final GameCards green = cards.where((card) => card == GameCard.green).toList();
@@ -279,8 +261,7 @@ class Discards extends ConsumerWidget {
       }, // builder
       onAccept: (Map data) {
         if (phase == GamePhase.discard && data['color'] != GameCard.white) {
-          ref.read(playerCardsProvider.notifier).update((state) => state.removed(data['id']));
-          ref.read(discardsProvider.notifier).update((state) => state.added(data['color']));
+          ref.read(gameStateProvider.notifier).discard(data['id']);
           ref.read(gamePhaseProvider.notifier).state = GamePhase.replace;
         }
       },
